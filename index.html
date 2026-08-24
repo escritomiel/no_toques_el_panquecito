@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🥞 ¡NO TOQUES EL PANQUECITO!</title>
+    <!-- Tailwind CSS CDN for visual utilities -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for playful game typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="w-screen h-screen bg-pattern select-none overflow-hidden touch-none flex flex-col justify-between items-center">
+
+    <!-- Sound Toggle Button -->
+    <button id="sound-btn" class="fixed top-4 right-4 z-50 bg-white/90 backdrop-blur border-2 border-amber-400 p-3 rounded-2xl shadow-lg text-2xl hover:scale-105 active:scale-95 transition-transform">
+        🔊
+    </button>
+
+    <!-- Header Stats Bar (Visible during game) -->
+    <div id="hud" class="hidden fixed top-4 left-4 right-16 z-40 flex justify-between items-center max-w-xl mx-auto px-4 py-2 bg-white/80 backdrop-blur-md rounded-2xl border-2 border-amber-300 shadow-md">
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-amber-800 uppercase tracking-wider">Puntuación</span>
+            <span id="score-display" class="text-3xl font-extrabold text-amber-600">0</span>
+        </div>
+        <div id="multiplier-badge" class="hidden text-xs bg-amber-500 text-white font-bold px-2 py-1 rounded-full animate-bounce">
+            ¡RÁPIDO!
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-amber-800/70 uppercase tracking-wider">Récord</span>
+            <span id="hud-high-score" class="text-2xl font-bold text-amber-900/80">0</span>
+        </div>
+    </div>
+
+    <!-- Timer / Progress Ring Container around Pancake or HUD top bar -->
+    <div id="timer-bar-container" class="hidden fixed top-20 left-1/2 -translate-x-1/2 w-48 h-3 bg-amber-200/80 rounded-full overflow-hidden border border-amber-400 shadow-inner z-40">
+        <div id="timer-bar" class="h-full bg-amber-500 rounded-full transition-all duration-75"></div>
+    </div>
+
+    <!-- MAIN GAME CANVAS FIELD -->
+    <main id="game-field" class="relative w-full h-full flex-grow cursor-crosshair">
+        <!-- Pancake target will be inserted dynamically here -->
+    </main>
+
+    <!-- START SCREEN OVERLAY -->
+    <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-gradient-to-b from-amber-50/95 via-amber-100/90 to-yellow-200/95 backdrop-blur-sm">
+        <div class="max-w-md w-full text-center space-y-6 bg-white/90 p-8 rounded-3xl border-4 border-amber-300 shadow-2xl relative overflow-hidden">
+            
+            <!-- Easter Egg Trigger Area on Title -->
+            <div id="title-container" class="cursor-pointer group">
+                <div class="text-6xl mb-2 pancake-idle inline-block transition-transform group-hover:scale-110">🥞</div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-amber-900 tracking-tight leading-tight">
+                    NO TOQUES EL PANQUECITO
+                </h1>
+            </div>
+
+            <p class="text-lg font-semibold text-amber-700/90 bg-amber-50 py-2 px-4 rounded-xl border border-amber-200 inline-block">
+                ¡Toca al panquecito antes de que te quedes sin tiempo! ¡Diviértete!
+            </p>
+
+            <div class="space-y-2 py-2">
+                <button id="start-btn" class="btn-game w-full py-4 px-8 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-2xl rounded-2xl border-2 border-amber-600 tracking-wide transform active:translate-y-1">
+                    [ EMPEZAR ]
+                </button>
+            </div>
+
+            <!-- Stats Preview -->
+            <div class="pt-4 border-t border-amber-200 flex justify-around text-amber-800 text-sm font-bold">
+                <div>🏆 RÉCORD: <span id="start-high-score" class="text-amber-600 text-lg">0</span></div>
+                <div>🎮 PARTIDAS: <span id="start-games-played" class="text-amber-600 text-lg">0</span></div>
+            </div>
+
+            <!-- User Profile & Session Card -->
+            <div id="user-profile-card" class="bg-amber-100/70 p-3 rounded-2xl border border-amber-300 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span id="player-avatar-display" class="text-3xl bg-white p-1 rounded-xl shadow-sm border border-amber-200">🥞</span>
+                    <div class="text-left">
+                        <div class="text-xs text-amber-800/70 font-bold uppercase tracking-wider">Jugador Activo</div>
+                        <div id="player-name-display" class="font-extrabold text-amber-950 text-base leading-tight">Panquecito Fan</div>
+                    </div>
+                </div>
+                <button id="edit-profile-btn" class="py-1.5 px-3 bg-white hover:bg-amber-50 text-amber-900 font-bold text-xs rounded-xl border border-amber-300 shadow-sm transition-colors">
+                    ✏️ Perfil
+                </button>
+            </div>
+
+            <!-- Records & History Modal Trigger Button -->
+            <button id="view-records-btn" class="w-full py-2.5 px-4 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-sm rounded-xl border border-amber-300 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                🏆 VER TABLA DE RÉCORDS E HISTORIAL
+            </button>
+            
+            <p id="easter-msg" class="hidden text-xs text-amber-600 font-bold italic animate-pulse">
+                ✨ ¡Has descubierto el secreto del Panquecito Dorado! (+10 puntos iniciales)
+            </p>
+        </div>
+    </div>
+
+    <!-- GAME OVER SCREEN OVERLAY -->
+    <div id="gameover-screen" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-amber-950/40 backdrop-blur-md">
+        <div class="max-w-md w-full text-center space-y-6 bg-white p-8 rounded-3xl border-4 border-amber-400 shadow-2xl transform transition-all animate-pop-in">
+            
+            <div class="text-6xl animate-bounce">💀</div>
+            <div>
+                <h2 class="text-3xl font-extrabold text-amber-950">GAME OVER</h2>
+                <p id="fail-reason" class="text-amber-700 font-medium mt-1">Panquecito ha escapado.</p>
+            </div>
+
+            <!-- Score Summary Card -->
+            <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-200 space-y-2">
+                <div class="flex justify-between items-center text-amber-900 font-bold text-lg">
+                    <span>PUNTUACIÓN:</span>
+                    <span id="final-score" class="text-3xl text-amber-600 font-black">0</span>
+                </div>
+                <div class="flex justify-between items-center text-amber-800/80 font-bold text-sm border-t border-amber-200/60 pt-2">
+                    <span>RÉCORD HISTÓRICO:</span>
+                    <span id="final-high-score" class="text-xl text-amber-800">0</span>
+                </div>
+                <div id="new-record-banner" class="hidden mt-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white font-extrabold py-1 px-3 rounded-lg text-sm shadow-md animate-pulse">
+                    🏆 ¡NUEVO RÉCORD! 🏆
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-4">
+                <button id="retry-btn" class="btn-game py-3 px-4 bg-amber-500 hover:bg-amber-400 text-white font-bold text-lg rounded-2xl border-2 border-amber-600">
+                    [ REINTENTAR ]
+                </button>
+                <button id="menu-btn" class="btn-game py-3 px-4 bg-stone-200 hover:bg-stone-100 text-stone-700 font-bold text-lg rounded-2xl border-2 border-stone-300">
+                    [ MENÚ ]
+                </button>
+            </div>
+
+            <button id="gameover-records-btn" class="w-full py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-sm rounded-xl border border-amber-300 flex items-center justify-center gap-1">
+                📜 Ver Registro de Partidas
+            </button>
+        </div>
+    </div>
+
+    <!-- LEADERBOARD / HISTORY MODAL OVERLAY -->
+    <div id="records-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-amber-950/50 backdrop-blur-md">
+        <div class="max-w-md w-full bg-white rounded-3xl border-4 border-amber-400 p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col animate-pop-in">
+            <div class="flex justify-between items-center border-b border-amber-200 pb-3">
+                <h3 class="text-2xl font-extrabold text-amber-950 flex items-center gap-2">
+                    <span>🏆</span> Registro de Partidas
+                </h3>
+                <button id="close-modal-x" class="text-amber-800 text-2xl font-bold hover:text-amber-600 px-2">✕</button>
+            </div>
+
+            <!-- Tabs selector -->
+            <div class="flex gap-2 bg-amber-100 p-1 rounded-2xl">
+                <button id="tab-records-btn" class="flex-1 py-2 text-xs sm:text-sm font-extrabold rounded-xl bg-amber-500 text-white shadow-sm transition-all">
+                    🥇 TOP RÉCORDS
+                </button>
+                <button id="tab-history-btn" class="flex-1 py-2 text-xs sm:text-sm font-extrabold rounded-xl text-amber-800 hover:bg-amber-200/60 transition-all">
+                    📜 MIS PARTIDAS
+                </button>
+            </div>
+
+            <!-- Records Dynamic Container -->
+            <div id="records-list-container" class="flex-1 overflow-y-auto space-y-2 pr-1 my-2 min-h-[220px]">
+                <!-- Loaded via JS -->
+            </div>
+
+            <button id="close-modal-btn" class="btn-game w-full py-3 bg-amber-500 hover:bg-amber-400 text-white font-bold text-lg rounded-2xl border-2 border-amber-600">
+                ¡ENTENDIDO!
+            </button>
+        </div>
+    </div>
+
+    <!-- USER LOGIN / PROFILE MODAL OVERLAY -->
+    <div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-amber-950/50 backdrop-blur-md">
+        <div class="max-w-md w-full bg-white rounded-3xl border-4 border-amber-400 p-6 shadow-2xl space-y-4 animate-pop-in">
+            <div class="flex justify-between items-center border-b border-amber-200 pb-3">
+                <h3 class="text-2xl font-extrabold text-amber-950 flex items-center gap-2">
+                    <span>👤</span> Tu Perfil de Jugador
+                </h3>
+                <button id="close-profile-x" class="text-amber-800 text-2xl font-bold hover:text-amber-600 px-2">✕</button>
+            </div>
+
+            <p class="text-xs font-semibold text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                Guarda tus partidas en la nube y aparece con tu nombre y avatar en la tabla global de récords.
+            </p>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">Nombre o Apodo</label>
+                    <input type="text" id="nickname-input" maxlength="15" placeholder="Ej: SuperPanqueque" class="w-full px-4 py-3 bg-amber-50 border-2 border-amber-300 rounded-2xl text-amber-950 font-bold focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">Elige tu Avatar</label>
+                    <div id="avatar-selector" class="flex justify-between gap-2 bg-amber-50 p-2 rounded-2xl border border-amber-200">
+                        <button type="button" class="avatar-option text-2xl p-2 rounded-xl border-2 border-amber-400 bg-amber-200" data-avatar="🥞">🥞</button>
+                        <button type="button" class="avatar-option text-2xl p-2 rounded-xl border-2 border-transparent hover:bg-amber-100" data-avatar="🧈">🧈</button>
+                        <button type="button" class="avatar-option text-2xl p-2 rounded-xl border-2 border-transparent hover:bg-amber-100" data-avatar="🍯">🍯</button>
+                        <button type="button" class="avatar-option text-2xl p-2 rounded-xl border-2 border-transparent hover:bg-amber-100" data-avatar="👑">👑</button>
+                        <button type="button" class="avatar-option text-2xl p-2 rounded-xl border-2 border-transparent hover:bg-amber-100" data-avatar="⚡">⚡</button>
+                        <button type="button" class="avatar-option text-2xl p-2 rounded-xl border-2 border-transparent hover:bg-amber-100" data-avatar="🍓">🍓</button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="save-profile-btn" class="btn-game w-full py-3 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-lg rounded-2xl border-2 border-amber-600">
+                💾 GUARDAR PERFIL
+            </button>
+        </div>
+    </div>
+
+    <!-- Firebase Integration Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'panquecito-game';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config ? JSON.parse(__firebase_config) : null;
+
+        window.db = null;
+        window.auth = null;
+        window.currentUser = null;
+        window.appId = appId;
+        window.cloudRecords = [];
+
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                window.db = getFirestore(app);
+                window.auth = getAuth(app);
+
+                const authenticate = async () => {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        const cred = await signInWithCustomToken(window.auth, __initial_auth_token);
+                        window.currentUser = cred.user;
+                    } else {
+                        const cred = await signInAnonymously(window.auth);
+                        window.currentUser = cred.user;
+                    }
+
+                    // Load user cloud profile if exists
+                    if (window.db && window.currentUser) {
+                        const userProfileRef = doc(window.db, 'artifacts', appId, 'users', window.currentUser.uid, 'profile', 'data');
+                        try {
+                            const snap = await getDoc(userProfileRef);
+                            if (snap.exists()) {
+                                const profileData = snap.data();
+                                if (profileData.name) window.playerProfile.name = profileData.name;
+                                if (profileData.avatar) window.playerProfile.avatar = profileData.avatar;
+                                if (window.updateProfileUI) window.updateProfileUI();
+                            }
+                        } catch(e) { console.warn("Notice loading cloud profile:", e); }
+                    }
+
+                    // Subscribe to global public leaderboard
+                    if (window.db) {
+                        const leaderboardRef = collection(window.db, 'artifacts', appId, 'public', 'data', 'leaderboard');
+                        onSnapshot(leaderboardRef, (snapshot) => {
+                            window.cloudRecords = [];
+                            snapshot.forEach(doc => {
+                                window.cloudRecords.push(doc.data());
+                            });
+                            if (window.refreshRecordsUI) window.refreshRecordsUI();
+                        }, (error) => {
+                            console.warn("Leaderboard snapshot notice:", error);
+                        });
+                    }
+                };
+                authenticate().catch(e => console.warn("Auth sync skipped:", e));
+            } catch (err) {
+                console.warn("Cloud persistence setup notice:", err);
+            }
+        }
+    </script>
+
+    <!-- Main Game Logic Script -->
+    <script src="script.js"></script>
+</body>
+</html>

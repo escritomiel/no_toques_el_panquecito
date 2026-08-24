@@ -1,0 +1,110 @@
+* {
+    font-family: 'Fredoka', cursive, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+}
+
+body {
+    background: radial-gradient(circle, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+    overflow: hidden;
+}
+
+/* Animated grid background for casual game vibe */
+.bg-pattern {
+    background-size: 30px 30px;
+    background-image: 
+        linear-gradient(to right, rgba(217, 119, 6, 0.07) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(217, 119, 6, 0.07) 1px, transparent 1px);
+}
+
+/* Dynamic Pancake Bounce Keyframes */
+@keyframes float-idle {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(3deg); }
+}
+
+@keyframes pop-in {
+    0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+    70% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes hit-shake {
+    0% { transform: scale(0.8) rotate(-10deg); }
+    50% { transform: scale(1.25) rotate(10deg); }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+@keyframes float-text {
+    0% { transform: translateY(0) scale(0.8); opacity: 1; }
+    100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+}
+
+@keyframes banner-slide {
+    0% { transform: translate(-50%, -100%) scale(0.8); opacity: 0; }
+    20% { transform: translate(-50%, 0) scale(1.05); opacity: 1; }
+    80% { transform: translate(-50%, 0) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -20px) scale(0.9); opacity: 0; }
+}
+
+.pancake-idle {
+    animation: float-idle 2.5s ease-in-out infinite;
+}
+
+.pancake-appear {
+    animation: pop-in 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.pancake-hit {
+    animation: hit-shake 0.2s ease-out forwards;
+}
+
+.floating-txt {
+    position: absolute;
+    pointer-events: none;
+    animation: float-text 0.8s ease-out forwards;
+    font-weight: 700;
+    text-shadow: 2px 2px 0px #000;
+    z-index: 40;
+}
+
+.absurd-banner {
+    position: absolute;
+    left: 50%;
+    top: 15%;
+    transform: translateX(-50%);
+    animation: banner-slide 2.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    z-index: 30;
+    pointer-events: none;
+}
+
+/* SVG Pancake drip animation */
+@keyframes drip {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+}
+
+.syrup-drip {
+    animation: drip 2s ease-in-out infinite;
+}
+
+/* Button glossy effects */
+.btn-game {
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 6px 0 #b45309, 0 10px 15px rgba(0,0,0,0.15);
+}
+
+.btn-game:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #b45309, 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Confetti particle */
+.particle {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 50;
+}
